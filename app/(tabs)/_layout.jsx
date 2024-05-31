@@ -12,7 +12,10 @@ export default function TabLayout() {
 	getAuth().onAuthStateChanged((user) => {
 		setIsLoading(false);
 		if (!user) {
+			console.log("User is signed in:", user.uid);
 			router.replace("/landing");
+		} else {
+			console.log("User is signed out");
 		}
 	});
 
@@ -36,7 +39,7 @@ export default function TabLayout() {
 				router.replace("/landing");
 			})
 			.catch((error) => {
-				console.log(error)
+				console.log(error);
 				// An error happened.
 			});
 	}

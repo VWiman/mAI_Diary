@@ -9,15 +9,19 @@ export default function Register() {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const { height, width } = useWindowDimensions();
+	const { width } = useWindowDimensions();
+	const [isLoading, setIsLoading] = useState(false);
 
 	const handleRegister = () => {
+		setIsLoading(true);
 		createUserWithEmailAndPassword(getAuth(), email, password)
 			.then((user) => {
+				setLoading(false);
 				if (user) router.replace("/(tabs)");
 			})
 			.catch((err) => {
 				alert(err?.message);
+				setIsLoading(false);
 			});
 	};
 
@@ -28,25 +32,27 @@ export default function Register() {
 				justifyContent: "center",
 				alignItems: "center",
 				backgroundColor: theme.colors.background,
-                paddingHorizontal: width / 10,
-                gap: 12
+				paddingHorizontal: width / 10,
+				gap: 12,
 			}}>
-			<View style={{ minWidth: "100%" }}>
+			<View style={{ minWidth: "100%", gap: 6  }}>
 				<TextInput
 					autoCapitalize="none"
 					label="Email"
 					keyboardType="email-address"
 					onChangeText={(text) => setEmail(text)}
+					disabled={isLoading}
 				/>
 				<TextInput
 					autoCapitalize="none"
 					label="Password"
 					secureTextEntry={true}
 					onChangeText={(text) => setPassword(text)}
+					disabled={isLoading}
 				/>
 			</View>
 
-			<Button mode="contained" onPress={handleRegister}>
+			<Button style={{width: 125}} mode="contained" onPress={handleRegister} disabled={isLoading}>
 				Register
 			</Button>
 		</View>

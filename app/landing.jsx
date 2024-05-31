@@ -15,10 +15,10 @@ export default function LandingScreen() {
 				gap: 12,
 			}}>
 			<Text variant="displayMedium">mAI Diary</Text>
-			<Button mode="contained" onPress={() => router.push("/login")}>
+			<Button style={{ width: 125 }} mode="contained" onPress={() => router.push("/login")}>
 				Login
 			</Button>
-			<Button mode="contained" onPress={() => router.push("/register")}>
+			<Button style={{ width: 125 }} mode="contained" onPress={() => router.push("/register")}>
 				Register
 			</Button>
 		</View>
