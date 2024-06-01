@@ -1,21 +1,25 @@
-import { Link, Tabs, useRouter } from "expo-router";
-import { useState } from "react";
+import { Tabs, useRouter } from "expo-router";
+import { useContext } from "react";
 import { getAuth, signOut } from "firebase/auth";
-import { Text, useTheme, Button } from "react-native-paper";
+import { useTheme, Button } from "react-native-paper";
 import { View } from "react-native";
+import { StateContext } from "../../context/stateContext";
+import { Spinner } from "../../components/spinner";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function TabLayout() {
-	const [isLoading, setIsLoading] = useState(true);
+	const { isLoading, setIsLoading } = useContext(StateContext);
 	const router = useRouter();
 	const theme = useTheme();
 
 	getAuth().onAuthStateChanged((user) => {
 		setIsLoading(false);
 		if (!user) {
-			console.log("User is signed in:", user.uid);
+			console.log("User is signed out");
 			router.replace("/landing");
 		} else {
-			console.log("User is signed out");
+			console.log("User is signed in:", user.uid);
+			
 		}
 	});
 
@@ -28,7 +32,7 @@ export default function TabLayout() {
 					alignItems: "center",
 					backgroundColor: theme.colors.background,
 				}}>
-				<Text>Loading...</Text>
+				<Spinner theme={theme} />
 			</View>
 		);
 
@@ -45,19 +49,41 @@ export default function TabLayout() {
 	}
 
 	return (
-		<Tabs>
+		<Tabs screenOptions={{ tabBarActiveTintColor: theme.colors.secondary }}>
 			<Tabs.Screen
 				name="index"
-				options={{
-					title: "DIARY",
-					headerRight: () => <Button onPress={() => handleLogOut()}>Log out</Button>,
+				options={({ navigation }) => {
+					const theme = useTheme(); // Access theme within the options function
+
+					return {
+						title: "DIARY",
+						headerRight: () => (
+							<Button onPress={() => handleLogOut()} mode="text">
+								Log out
+							</Button> // React Native Paper Button
+						),
+						tabBarIcon: ({ color, size }) => (
+							<MaterialCommunityIcons name="book-outline" size={size} color={theme.colors.primary} /> // Customize icon name and theme color
+						),
+					};
 				}}
 			/>
 			<Tabs.Screen
 				name="entry"
-				options={{
-					title: "NEW ENTRY",
-					headerRight: () => <Button onPress={() => handleLogOut()}>Log out</Button>,
+				options={({ navigation }) => {
+					const theme = useTheme(); // Access theme within the options function
+
+					return {
+						title: "NEW ENTRY",
+						headerRight: () => (
+							<Button onPress={() => handleLogOut()} mode="text">
+								Log out
+							</Button> // React Native Paper Button
+						),
+						tabBarIcon: ({ color, size }) => (
+							<MaterialCommunityIcons name="pencil" size={size} color={theme.colors.primary} /> // Customize icon name and theme color
+						),
+					};
 				}}
 			/>
 		</Tabs>

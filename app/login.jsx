@@ -3,6 +3,9 @@ import { useTheme, Button, TextInput } from "react-native-paper";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useRouter } from "expo-router";
+import { useContext } from "react";
+import { StateContext } from "../context/stateContext";
+import { Spinner } from "../components/spinner";
 
 export default function Login() {
 	const theme = useTheme();
@@ -10,7 +13,7 @@ export default function Login() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const { width } = useWindowDimensions();
-	const [isLoading, setIsLoading] = useState(false);
+	const { isLoading, setIsLoading } = useContext(StateContext);
 
 	const handleLogin = () => {
 		setIsLoading(true);
@@ -55,7 +58,7 @@ export default function Login() {
 			</View>
 
 			<Button style={{ width: 125 }} mode="contained" onPress={handleLogin} disabled={isLoading}>
-				Log in
+				{isLoading ? <Spinner theme={theme} /> : "Log in"}
 			</Button>
 		</View>
 	);

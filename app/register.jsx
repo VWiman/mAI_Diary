@@ -3,6 +3,10 @@ import { useTheme, Button, TextInput } from "react-native-paper";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useRouter } from "expo-router";
+import { useContext } from "react";
+import { StateContext } from "../context/stateContext";
+import { Spinner } from "../components/spinner";
+
 
 export default function Register() {
 	const theme = useTheme();
@@ -10,13 +14,13 @@ export default function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const { width } = useWindowDimensions();
-	const [isLoading, setIsLoading] = useState(false);
+	const { isLoading, setIsLoading } = useContext(StateContext);
 
 	const handleRegister = () => {
 		setIsLoading(true);
 		createUserWithEmailAndPassword(getAuth(), email, password)
 			.then((user) => {
-				setLoading(false);
+				setIsLoading(false);
 				if (user) router.replace("/(tabs)");
 			})
 			.catch((err) => {
@@ -35,7 +39,7 @@ export default function Register() {
 				paddingHorizontal: width / 10,
 				gap: 12,
 			}}>
-			<View style={{ minWidth: "100%", gap: 6  }}>
+			<View style={{ minWidth: "100%", gap: 6 }}>
 				<TextInput
 					autoCapitalize="none"
 					label="Email"
@@ -52,8 +56,8 @@ export default function Register() {
 				/>
 			</View>
 
-			<Button style={{width: 125}} mode="contained" onPress={handleRegister} disabled={isLoading}>
-				Register
+			<Button style={{ width: 125 }} mode="contained" onPress={handleRegister} disabled={isLoading}>
+				{isLoading ? <Spinner theme={theme} /> : "Register"}
 			</Button>
 		</View>
 	);

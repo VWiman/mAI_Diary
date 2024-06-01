@@ -7,15 +7,17 @@ import { User } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import SpaceMono from "../assets/fonts/SpaceMono-Regular.ttf";
+import { StateProvider } from "../context/stateContext";
 
 const firebaseConfig = {
-	apiKey: "AIzaSyAg7vWyDCLh4deh6i5R6z4BP6PzyqliP7U",
-	authDomain: "diary-14de3.firebaseapp.com",
-	projectId: "diary-14de3",
-	storageBucket: "diary-14de3.appspot.com",
-	messagingSenderId: "801876101851",
-	appId: "1:801876101851:web:810c81e0e3fe85c1421afe",
-	measurementId: "G-B073YKH1Q0",
+	apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+	authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+	projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+	storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+	measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -23,18 +25,54 @@ initializeAuth(app, {
 	persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
 
-export {
-	// Catch any errors thrown by the Layout component.
-	ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-	// Ensure that reloading on `/modal` keeps a back button present.
 	initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+	const [loaded, error] = useFonts({
+		SpaceMono,
+	});
+
+	useEffect(() => {
+		if (error) throw error;
+	}, [error]);
+
+	useEffect(() => {
+		if (loaded) {
+			SplashScreen.hideAsync();
+		}
+	}, [loaded]);
+
+	if (!loaded) {
+		return null;
+	}
+
+	return (
+		<StateProvider>
+			<RootLayoutNav />
+		</StateProvider>
+	);
+}
+
+function RootLayoutNav() {
+	return (
+		
+			<PaperProvider theme={theme}>
+				<Stack screenOptions={{ headerStyle: { backgroundColor: theme.colors.background } }}>
+					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+					<Stack.Screen name="landing" options={{ headerShown: false }} />
+					<Stack.Screen name="login" options={{ presentation: "modal", headerTitle: "Login" }} />
+					<Stack.Screen name="register" options={{ presentation: "modal", headerTitle: "Register" }} />
+				</Stack>
+			</PaperProvider>
+		
+	);
+}
 
 const theme = {
 	...DefaultTheme,
@@ -81,39 +119,3 @@ const theme = {
 		backdrop: "rgba(42, 50, 53, 0.4)",
 	},
 };
-
-export default function RootLayout() {
-	const [loaded, error] = useFonts({
-		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-	});
-
-	// Expo Router uses Error Boundaries to catch errors in the navigation tree.
-	useEffect(() => {
-		if (error) throw error;
-	}, [error]);
-
-	useEffect(() => {
-		if (loaded) {
-			SplashScreen.hideAsync();
-		}
-	}, [loaded]);
-
-	if (!loaded) {
-		return null;
-	}
-
-	return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-	return (
-		<PaperProvider theme={theme}>
-			<Stack screenOptions={{ headerStyle: { backgroundColor: theme.colors.background } }}>
-				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-				<Stack.Screen name="landing" options={{ headerShown: false }} />
-				<Stack.Screen name="login" options={{ presentation: "modal", headerTitle: "Login" }} />
-				<Stack.Screen name="register" options={{ presentation: "modal", headerTitle: "Register" }} />
-			</Stack>
-		</PaperProvider>
-	);
-}
