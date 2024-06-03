@@ -21,7 +21,7 @@ export default function Register() {
 		createUserWithEmailAndPassword(getAuth(), email, password)
 			.then((user) => {
 				setIsLoading(false);
-				if (user) router.replace("/(tabs)");
+				if (user) router.navigate("/(tabs)");
 			})
 			.catch((err) => {
 				alert(err?.message);

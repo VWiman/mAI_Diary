@@ -3,7 +3,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { MD3LightTheme as DefaultTheme, PaperProvider } from "react-native-paper";
-import { User } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
@@ -61,16 +60,14 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
 	return (
-		
-			<PaperProvider theme={theme}>
-				<Stack screenOptions={{ headerStyle: { backgroundColor: theme.colors.background } }}>
-					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-					<Stack.Screen name="landing" options={{ headerShown: false }} />
-					<Stack.Screen name="login" options={{ presentation: "modal", headerTitle: "Login" }} />
-					<Stack.Screen name="register" options={{ presentation: "modal", headerTitle: "Register" }} />
-				</Stack>
-			</PaperProvider>
-		
+		<PaperProvider theme={theme}>
+			<Stack screenOptions={{ headerStyle: { backgroundColor: theme.colors.background } }}>
+				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+				<Stack.Screen name="landing" options={{ headerShown: false }} />
+				<Stack.Screen name="login" options={{ presentation: "modal", headerTitle: "Login" }} />
+				<Stack.Screen name="register" options={{ presentation: "modal", headerTitle: "Register" }} />
+			</Stack>
+		</PaperProvider>
 	);
 }
 

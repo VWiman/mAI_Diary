@@ -21,7 +21,7 @@ export default function Login() {
 			.then((user) => {
 				if (user) {
 					setIsLoading(false);
-					router.replace("/(tabs)");
+					router.navigate("/(tabs)");
 				}
 			})
 			.catch((err) => {
