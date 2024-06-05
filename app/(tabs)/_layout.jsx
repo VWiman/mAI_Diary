@@ -1,11 +1,10 @@
 import { Tabs, useRouter } from "expo-router";
 import { useContext, useEffect } from "react";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { useTheme, Button } from "react-native-paper";
+import { useTheme, Button, Icon } from "react-native-paper";
 import { View } from "react-native";
 import { StateContext } from "../../context/stateContext";
 import { Spinner } from "../../components/spinner";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { DiaryProvider } from "../../context/diaryContext";
 import { ApiProvider } from "../../context/apiContext";
 
@@ -36,7 +35,6 @@ export default function TabLayout() {
 		return () => unsubscribe();
 	}, [auth, router]);
 
-
 	if (isLoading)
 		return (
 			<View
@@ -64,22 +62,23 @@ export default function TabLayout() {
 	return (
 		<ApiProvider>
 			<DiaryProvider>
-				<Tabs screenOptions={{ tabBarActiveTintColor: theme.colors.secondary }}>
+				<Tabs
+					screenOptions={{
+						tabBarActiveTintColor: theme.colors.secondary,
+						tabBarInactiveTintColor: theme.colors.onSurfaceDisabled,
+					}}>
 					<Tabs.Screen
 						name="index"
 						key="index"
 						options={() => {
-							const theme = useTheme();
 							return {
 								title: "DIARY",
-								headerRight: () => (
+								headerRight: ({ size, color }) => (
 									<Button onPress={() => handleLogOut()} mode="text">
-										Log out
+										Log out <Icon source={"logout"} size={size} color={color} />
 									</Button>
 								),
-								tabBarIcon: ({ size }) => (
-									<MaterialCommunityIcons name="book-outline" size={size} color={theme.colors.primary} />
-								),
+								tabBarIcon: ({ size, color }) => <Icon source="book-outline" size={size} color={color} />,
 							};
 						}}
 					/>
@@ -87,19 +86,28 @@ export default function TabLayout() {
 						name="entry"
 						key="entry"
 						options={() => {
-							const theme = useTheme();
-
 							return {
 								title: "NEW ENTRY",
-								headerRight: () => (
+								headerRight: ({ size, color }) => (
 									<Button onPress={() => handleLogOut()} mode="text">
-										Log out
+										Log out <Icon source={"logout"} size={size} color={color} />
 									</Button>
 								),
-								tabBarIcon: ({ size }) => (
-									<MaterialCommunityIcons name="pencil" size={size} color={theme.colors.primary} />
-								),
+								tabBarIcon: ({ size, color }) => <Icon source="pencil-outline" size={size} color={color} />,
 							};
+						}}
+					/>
+					<Tabs.Screen
+						name="result"
+						options={{
+							href: null,
+							title: "RESULT",
+							headerRight: ({ size, color }) => (
+								<Button onPress={() => handleLogOut()} mode="text">
+									Log out <Icon source={"logout"} size={size} color={color} />
+								</Button>
+							),
+							headerLeft: () => <Button icon={"close"} onPress={() => router.navigate("/entry")} mode="text" />,
 						}}
 					/>
 				</Tabs>
