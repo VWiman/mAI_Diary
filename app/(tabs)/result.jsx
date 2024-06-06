@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
-import { SafeAreaView, ScrollView, View, useWindowDimensions } from "react-native";
-import { Button, Divider, Surface, Text, useTheme } from "react-native-paper";
+import { Image, SafeAreaView, ScrollView, View, useWindowDimensions } from "react-native";
+import { Button, Surface, Text, useTheme } from "react-native-paper";
 import { ApiContext } from "../../context/apiContext";
 import { router } from "expo-router";
 
 export default function Result() {
 	const theme = useTheme();
 	const { width } = useWindowDimensions();
-	const { displayResult, setDisplayResult } = useContext(ApiContext);
+	const { displayResult, setDisplayResult, imageApiResponse } = useContext(ApiContext);
 
 	return (
 		<SafeAreaView
@@ -20,7 +20,22 @@ export default function Result() {
 			<ScrollView style={{ minWidth: "100%", paddingHorizontal: width / 10, paddingTop: 20 }}>
 				<Surface
 					elevation={2}
-					style={{ backgroundColor: theme.colors.surfaceVariant, padding: 20, marginBottom: 80, borderRadius: 5 }}>
+					style={{
+						backgroundColor: theme.colors.surfaceVariant,
+						gap: 20,
+						padding: 20,
+						alignItems: "center",
+						marginBottom: 80,
+						borderRadius: 5,
+					}}>
+					{imageApiResponse ? (
+						<Image
+							source={{ uri: imageApiResponse }}
+							style={{ width: 256, borderRadius: 5, height: 256, resizeMode: "contain" }}
+						/>
+					) : (
+						<Image />
+					)}
 					<Text>{displayResult}</Text>
 				</Surface>
 			</ScrollView>

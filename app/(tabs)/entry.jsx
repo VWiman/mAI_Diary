@@ -11,9 +11,17 @@ export default function Entry() {
 	const theme = useTheme();
 	const { width, height } = useWindowDimensions();
 	const [isFetching, setIsFetching] = useState(false);
-	const { apiKey, apiResponse, setApiResponse, displayResult, setDisplayResult } = useContext(ApiContext);
+	const {
+		apiKey,
+		apiResponse,
+		setApiResponse,
+		displayResult,
+		setDisplayResult,
+		setImageApiResponse,
+	} = useContext(ApiContext);
 	const [mood, setMood] = useState("");
 	const [text, setText] = useState("");
+	const [imageGenerating, setImageGenerating] = useState(false);
 	const [message, setMessage] = useState("");
 	const dateTime = new Date().toDateString();
 	const router = useRouter();
@@ -41,7 +49,19 @@ export default function Entry() {
 		setDisplayResult(apiResponse);
 	}, [apiResponse]);
 
+	useEffect(() => {
+		if (displayResult && isFetching && !imageGenerating) {
+			setImageGenerating(true);
+			handleImage();
+		}
+	}, [displayResult, isFetching]);
+
 	async function handleSend() {
+		if (!adress || adress.length === 0) {
+			alert("Still fetching your location, please wait.");
+			return;
+		}
+
 		try {
 			setIsFetching(true);
 			console.log("Is sending...");
@@ -62,7 +82,7 @@ export default function Entry() {
 						},
 						{
 							role: "system",
-							content: `You are ghostwriting a diary. The user will provide details about their day, and your task is to transform these details into a well written basic diary entry. For context the date and time of this entry ${dateTime} and location is ${adress[0].subregion} ${adress[0].country}. You only return the entry, do not format it in any way. Do not include any header. Just plain text entry. Even if the user provided information is short, you still provide an entry. The prevailing feeling today was ${mood}. Then max 4 paragraphs.`,
+							content: `You are ghostwriting a diary. The user will provide details about their day, and your task is to transform these details into a well written basic diary entry. For context the date and time of this entry ${dateTime} and location is ${adress[0].subregion} ${adress[0].country}. You only return the entry, do not format it in any way. Do not include any header. Just plain text entry. Even if the user provided information is short, you still provide an entry. The prevailing feeling today was ${mood} but only let it influence a little bit. Then max 4 paragraphs. Do NOT make up events.`,
 						},
 					],
 				}),
@@ -80,11 +100,61 @@ export default function Entry() {
 				throw new Error(data.error.message || "Failed to fetch response from OpenAI");
 			}
 		} catch (error) {
-			console.error("API request failed.");
+			console.error("API request failed.", error);
 			setApiResponse("Failed to send message. Please try again.");
 		} finally {
-			setIsFetching(false);
 			console.log(apiResponse);
+		}
+	}
+
+	async function handleImage() {
+		if (!apiResponse) {
+			console.error("No API response available for image generation.");
+			return;
+		}
+
+		const prompt = apiResponse.toString();
+		const stringPrompt = prompt.slice(0, 120);
+		const finalStringPrompt = stringPrompt ? "Vector art, In sweden, " + stringPrompt : "";
+
+		if (!finalStringPrompt) {
+			console.error("No description available for image generation.");
+			return;
+		}
+
+		console.log(finalStringPrompt);
+
+		try {
+			const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${apiKey}`,
+				},
+				body: JSON.stringify({
+					model: "dall-e-3",
+					prompt: stringPrompt,
+					n: 1,
+					size: "1024x1024",
+				}),
+			});
+
+			const imageData = await imageResponse.json();
+
+			if (imageResponse.ok) {
+				setIsFetching(false);
+				setImageGenerating(false);
+				console.log(imageData);
+				setImageApiResponse(imageData.data[0].url);
+			} else {
+				setIsFetching(false);
+				setImageGenerating(false);
+				throw new Error(imageData.error.message || "Failed to fetch image from OpenAI");
+			}
+		} catch (error) {
+			setIsFetching(false);
+			setImageGenerating(false);
+			console.error("Image API request failed:", error);
 		}
 	}
 
@@ -122,7 +192,7 @@ export default function Entry() {
 						placeholder="How did you feel today?"
 						maxLength={20}
 						value={mood}
-						onChangeText={(mood) => setTitle(mood)}
+						onChangeText={(mood) => setMood(mood)}
 					/>
 					<TextInput
 						style={{
@@ -144,7 +214,8 @@ export default function Entry() {
 							setText(text);
 						}}
 					/>
-					{displayResult ? (
+
+					{displayResult && !isFetching ? (
 						<Button style={{ width: 125 }} mode="contained" onPress={handleDisplayResult} disabled={!displayResult}>
 							See result
 						</Button>
