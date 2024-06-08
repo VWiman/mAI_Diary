@@ -4,5 +4,8 @@ export const DiaryContext = createContext();
 
 export const DiaryProvider = ({ children }) => {
 	const [isLoading, setIsLoading] = useState(true);
-	return <DiaryContext.Provider value={{ isLoading, setIsLoading }}>{children}</DiaryContext.Provider>;
+	const [entries, setEntries] = useState([]);
+	return (
+		<DiaryContext.Provider value={{ isLoading, setIsLoading, entries, setEntries }}>{children}</DiaryContext.Provider>
+	);
 };
