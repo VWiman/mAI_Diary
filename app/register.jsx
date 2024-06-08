@@ -29,7 +29,7 @@ export default function Register() {
 				try {
 					await createDiaryFile(user.uid); // Attempts to create a diary file for the user
 					console.log(`Registration successful for ${user.uid} and diary created and saved.`);
-					router.navigate("/login"); // Navigates to login page on successful registration
+					router.navigate("/"); // Navigates to login page on successful registration
 				} catch (error) {
 					console.error("Could not create diary file:", error);
 					// Deletes the user if the diary file cannot be created

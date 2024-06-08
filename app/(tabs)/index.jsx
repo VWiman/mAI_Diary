@@ -71,7 +71,7 @@ export default function Diary() {
 				backgroundColor: theme.colors.background,
 			}}>
 			<FlatList
-				style={{ flex: 1, minWidth: "100%", padding: 25 }}
+				style={{ flex: 1, minWidth: "100%", padding: width / 25 }}
 				data={entries}
 				renderItem={renderEntry}
 				keyExtractor={(item) => item.id.toString()}

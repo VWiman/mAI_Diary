@@ -9,7 +9,7 @@ import { addDiaryEntry, getDiaryEntries } from "../../utilities/diaryManager";
 import { DiaryContext } from "../../context/diaryContext";
 
 export default function Result() {
-	const { setEntries } = useContext(DiaryContext);
+	const { setEntries, isSaving, setIsSaving } = useContext(DiaryContext);
 	const theme = useTheme();
 	const { width } = useWindowDimensions();
 	const { displayResult, setDisplayResult, imageApiResponse, setImageApiResponse } = useContext(ApiContext);
@@ -17,7 +17,7 @@ export default function Result() {
 	const dateTime = new Date().toDateString();
 	const blurhash =
 		"|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
-	
+
 	useEffect(() => {
 		console.log("Image API Response set", imageApiResponse);
 		return () => {
@@ -27,6 +27,7 @@ export default function Result() {
 	}, [imageApiResponse]);
 
 	async function handleSaveEntry() {
+		setIsSaving(true)
 		const auth = getAuth();
 		const user = auth.currentUser;
 		if (user && displayResult && imageApiResponse) {
@@ -36,15 +37,15 @@ export default function Result() {
 			};
 			try {
 				await addDiaryEntry(user.uid, entry, imageApiResponse);
-				console.log(entry)
 				alert("Entry saved!");
 				const updatedEntries = await getDiaryEntries(user.uid);
 				setEntries(updatedEntries);
 				router.navigate("/");
 				setDisplayResult("");
+				setIsSaving(false);
 			} catch (error) {
-				console.error("Error saving entry:", error);
 				alert("Failed to save entry.");
+				setIsSaving(false);
 			}
 		} else {
 			alert("No user is logged in or data is missing.");
@@ -99,10 +100,11 @@ export default function Result() {
 					onPress={() => {
 						handleSaveEntry();
 					}}
+					disabled={isSaving}
+					loading={isSaving}
 					style={{ width: 125 }}
-					mode="contained"
-					disabled={!displayResult}>
-					Save
+					mode="contained">
+					{isSaving ? "Loading" : "Save"}
 				</Button>
 				<Button
 					onPress={() => {
@@ -110,7 +112,7 @@ export default function Result() {
 					}}
 					style={{ width: 125 }}
 					mode="contained"
-					disabled={!displayResult}>
+					disabled={isSaving}>
 					Dismiss
 				</Button>
 			</View>
