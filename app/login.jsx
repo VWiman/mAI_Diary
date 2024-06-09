@@ -31,7 +31,7 @@ export default function Login() {
 					// Attempt to access the diary entries to confirm file access
 					const entries = await getDiaryEntries(user.uid);
 					console.log(`Diary entries accessed successfully, total entries: ${entries.length}`);
-					router.navigate("/(tabs)"); // Navigate on success
+					router.replace("/(tabs)"); // Navigate on success
 				} catch (error) {
 					// If diary access fails, sign out and notify the user
 					signOut(getAuth()); // Correcting to use getAuth() to obtain the auth instance

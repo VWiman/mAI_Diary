@@ -17,6 +17,8 @@ const ensureDiaryDirectoryExists = async () => {
 	const dir = await FileSystem.getInfoAsync(diaryDirectory);
 	if (!dir.exists) {
 		await FileSystem.makeDirectoryAsync(diaryDirectory, { intermediates: true });
+	} else {
+		return
 	}
 };
 

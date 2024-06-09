@@ -22,7 +22,6 @@ export default function Result() {
 		console.log("Image API Response set", imageApiResponse);
 		return () => {
 			console.log("Component unmounting or re-rendering, current image API Response", imageApiResponse);
-			// Optionally clear the imageApiResponse here if it's the correct place to do so
 		};
 	}, [imageApiResponse]);
 

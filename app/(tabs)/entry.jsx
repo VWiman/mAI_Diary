@@ -197,7 +197,7 @@ export default function Entry() {
 			});
 
 			const imageData = await imageResponse.json();
-
+			setImageApiResponse("");
 			if (imageResponse.ok) {
 				setIsFetching(false);
 				setImageGenerating(false);
