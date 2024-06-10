@@ -1,8 +1,8 @@
 import { Tabs, useRouter } from "expo-router";
 import { useContext, useEffect } from "react";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { useTheme, Button, Icon } from "react-native-paper";
-import { View } from "react-native";
+import { useTheme, Button, Icon, Text } from "react-native-paper";
+import { Pressable, View } from "react-native";
 import { StateContext } from "../../context/stateContext";
 import { Spinner } from "../../components/spinner";
 import { DiaryProvider } from "../../context/diaryContext";
@@ -73,10 +73,29 @@ export default function TabLayout() {
 						options={() => {
 							return {
 								title: "DIARY",
-								headerRight: ({ size, color }) => (
-									<Button onPress={() => handleLogOut()} mode="text">
-										Log out <Icon source={"logout"} size={size} color={color} />
-									</Button>
+								headerRight: () => (
+									<Pressable
+										style={{
+											flex: 1,
+											flexDirection: "row",
+											alignItems: "center",
+											padding: 5,
+											gap: 2,
+											marginHorizontal: 10,
+											borderRadius: 5,
+										}}
+										onPress={() => handleLogOut()}>
+										<Text
+											style={{
+												fontWeight: "bold",
+												fontSize: 10,
+												textTransform: "uppercase",
+												color: theme.colors.primary,
+											}}>
+											log out
+										</Text>
+										<Icon color={theme.colors.primary} size={10} source={"logout"} />
+									</Pressable>
 								),
 								tabBarIcon: ({ size, color }) => <Icon source="book-outline" size={size} color={color} />,
 							};
@@ -88,10 +107,11 @@ export default function TabLayout() {
 						options={() => {
 							return {
 								title: "NEW ENTRY",
-								headerRight: ({ size, color }) => (
-									<Button onPress={() => handleLogOut()} mode="text">
-										Log out <Icon source={"logout"} size={size} color={color} />
-									</Button>
+								headerRight: () => (
+									<Pressable style={ {flex: 1, flexDirection: "row", alignItems:"center", padding: 5, gap: 2, marginHorizontal: 10, borderRadius: 5}} onPress={() => handleLogOut()}>
+										<Text style={{fontWeight: "bold", fontSize: 10, textTransform: "uppercase", color: theme.colors.primary}}>log out</Text>
+										<Icon color={theme.colors.primary} size={10} source={"logout"} />
+									</Pressable>
 								),
 								tabBarIcon: ({ size, color }) => <Icon source="pencil-outline" size={size} color={color} />,
 							};
