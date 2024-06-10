@@ -8,6 +8,7 @@ import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import SpaceMono from "../assets/fonts/SpaceMono-Regular.ttf";
 import { StateProvider } from "../context/stateContext";
+import { StatusBar } from "react-native";
 
 const firebaseConfig = {
 	apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -44,6 +45,7 @@ export default function RootLayout() {
 	useEffect(() => {
 		if (loaded) {
 			SplashScreen.hideAsync();
+			StatusBar.setBarStyle("dark-content", true);
 		}
 	}, [loaded]);
 
