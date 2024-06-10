@@ -31,9 +31,9 @@ export default function Diary() {
 
 	const handleSelect = (id) => {
 		if (selectedEntryId === id) {
-			setSelectedEntryId(null); // Toggle close if the same id is clicked again
+			setSelectedEntryId(null);
 		} else {
-			setSelectedEntryId(id); // Open the clicked id
+			setSelectedEntryId(id);
 		}
 	};
 
