@@ -1,5 +1,5 @@
-import { FlatList, Pressable, View, useWindowDimensions } from "react-native";
-import { Divider, Text, useTheme } from "react-native-paper";
+import { FlatList, Pressable, SafeAreaView, View, useWindowDimensions } from "react-native";
+import { Divider, Icon, Text, useTheme } from "react-native-paper";
 import { getAuth } from "firebase/auth";
 import { getDiaryEntries } from "../../utilities/diaryManager";
 import { useContext, useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import { Image } from "expo-image";
 
 export default function Diary() {
 	const theme = useTheme();
+	const [isSelected, setIsSelected] = useState(false);
 	const { entries, setEntries } = useContext(DiaryContext);
 	const [selectedEntryId, setSelectedEntryId] = useState(null);
 	const { width } = useWindowDimensions();
@@ -28,6 +29,35 @@ export default function Diary() {
 		fetchEntries();
 	}, []);
 
+	const handleSelect = (id) => {
+		if (selectedEntryId === id) {
+			setSelectedEntryId(null); // Toggle close if the same id is clicked again
+		} else {
+			setSelectedEntryId(id); // Open the clicked id
+		}
+	};
+
+	const InnerEntry = ({ item }) => {
+		if (selectedEntryId == item.id) {
+			setIsSelected(true);
+			return (
+				<>
+					<Image
+						source={item.imagePath}
+						placeholder={{ blurhash }}
+						contentFit="contain"
+						style={{ width: imageSize, height: imageSize, borderRadius: 5 }}
+						transition={1000}
+					/>
+					<Divider bold style={{ width: "100%" }} />
+					<Text style={{ paddingHorizontal: 5 }}>{item.text.toString()}</Text>
+				</>
+			);
+		} else {
+			return null;
+		}
+	};
+
 	const renderEntry = ({ item }) => {
 		return (
 			<>
@@ -40,22 +70,20 @@ export default function Diary() {
 						justifyContent: "center",
 						alignItems: "center",
 						borderRadius: 5,
-					}}
-					onPress={() => setSelectedEntryId(item.id)}>
-					<Text
-						variant="titleMedium"
-						style={{ color: theme.colors.primary, alignSelf: "flex-start", fontWeight: "bold" }}>
-						{item.title.toString()}
-					</Text>
-					<Image
-						source={item.imagePath}
-						placeholder={{ blurhash }}
-						contentFit="contain"
-						style={{ width: imageSize, height: imageSize, borderRadius: 5 }}
-						transition={1000}
-					/>
-					<Divider bold style={{ width: "100%" }} />
-					<Text style={{ paddingHorizontal: 5 }}>{item.text.toString()}</Text>
+					}}>
+					<Pressable
+						onPress={() => handleSelect(item.id)}
+						style={{ flex: 1, flexDirection: "row", alignItems: "center", width: imageSize }}>
+						<Icon
+							size={24}
+							source={selectedEntryId == item.id ? "chevron-down" : "chevron-up"}
+							color={theme.colors.primary}
+						/>
+						<Text variant="titleMedium" style={{ color: theme.colors.primary, fontWeight: "bold" }}>
+							{item.title.toString()}
+						</Text>
+					</Pressable>
+					<InnerEntry item={item} />
 				</Pressable>
 				<Divider style={{ width: "100%", marginVertical: 20 }} />
 			</>
@@ -63,7 +91,7 @@ export default function Diary() {
 	};
 
 	return (
-		<View
+		<SafeAreaView
 			style={{
 				flex: 1,
 				justifyContent: "center",
@@ -71,12 +99,12 @@ export default function Diary() {
 				backgroundColor: theme.colors.background,
 			}}>
 			<FlatList
-				style={{ flex: 1, minWidth: "100%", padding: width / 25 }}
+				style={{ flex: 1, minWidth: "100%", padding: 15 }}
 				data={entries}
 				renderItem={renderEntry}
 				keyExtractor={(item) => item.id.toString()}
 				extraData={selectedEntryId}
 			/>
-		</View>
+		</SafeAreaView>
 	);
 }

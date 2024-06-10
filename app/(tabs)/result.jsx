@@ -59,7 +59,7 @@ export default function Result() {
 				alignItems: "center",
 				backgroundColor: theme.colors.background,
 			}}>
-			<ScrollView style={{ flex: 1, minWidth: "100%", padding: width / 25 }}>
+			<ScrollView style={{ flex: 1, minWidth: "100%", padding: 15 }}>
 				<Surface
 					elevation={2}
 					style={{
