@@ -39,7 +39,6 @@ export default function Diary() {
 
 	const InnerEntry = ({ item }) => {
 		if (selectedEntryId == item.id) {
-			setIsSelected(true);
 			return (
 				<>
 					<Image
