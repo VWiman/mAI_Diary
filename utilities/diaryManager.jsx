@@ -50,12 +50,14 @@ export const addDiaryEntry = async (userId, entry, imageUrl) => {
 
 // Delete a specific entry from a user's diary
 export const deleteDiaryEntry = async (userId, entryIndex) => {
+	 console.log("Starting delete of entry:", entryIndex, "for user", userId)
 	const filePath = diaryDirectory + `${userId}.json`;
 	const result = await FileSystem.readAsStringAsync(filePath);
 	const diary = JSON.parse(result);
 	if (diary.entries.length > entryIndex) {
 		// Ensure the entry exists
 		diary.entries.splice(entryIndex, 1); // Remove the entry
+		console.log("entry deleted")
 		await FileSystem.writeAsStringAsync(filePath, JSON.stringify(diary));
 	}
 };
