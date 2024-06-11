@@ -25,8 +25,20 @@ export default function Result() {
 		};
 	}, [imageApiResponse]);
 
+	const RenderedImage = () => {
+		return (
+			<Image
+				source={imageApiResponse}
+				placeholder={{ blurhash }}
+				contentFit="contain"
+				style={{ width: imageSize, height: imageSize, borderRadius: 5 }}
+				transition={1000}
+			/>
+		);
+	};
+
 	async function handleSaveEntry() {
-		setIsSaving(true)
+		setIsSaving(true);
 		const auth = getAuth();
 		const user = auth.currentUser;
 		if (user && displayResult && imageApiResponse) {
@@ -71,13 +83,7 @@ export default function Result() {
 						marginBottom: 80,
 						borderRadius: 5,
 					}}>
-					<Image
-						source={imageApiResponse}
-						placeholder={{ blurhash }}
-						contentFit="contain"
-						style={{ width: imageSize, height: imageSize, borderRadius: 5 }}
-						transition={1000}
-					/>
+					<RenderedImage />
 					<Divider bold style={{ width: "100%" }} />
 					<Text style={{ paddingHorizontal: 5 }}>{displayResult}</Text>
 				</Surface>

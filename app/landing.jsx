@@ -14,6 +14,7 @@ export default function LandingScreen() {
 				backgroundColor: theme.colors.background,
 				gap: 12,
 			}}>
+		
 			<Text variant="displayMedium">mAI Diary</Text>
 			<Button style={{ width: 125 }} mode="contained" onPress={() => router.push("/login")}>
 				Login

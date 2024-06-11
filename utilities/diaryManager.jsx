@@ -71,10 +71,24 @@ export const clearAllDiaryEntries = async (userId) => {
 
 // Retrieve all entries from a user's diary
 export const getDiaryEntries = async (userId) => {
-	const filePath = diaryDirectory + `${userId}.json`;
-	const result = await FileSystem.readAsStringAsync(filePath);
-	const diary = JSON.parse(result);
-	return diary.entries; // Return the list of entries
+    const filePath = `${diaryDirectory}${userId}.json`;
+    try {
+        const file = await FileSystem.getInfoAsync(filePath);
+        if (!file.exists) {
+            // Handle case when diary file doesn't exist
+            console.log(`No diary file found for user ${userId}, initializing new diary.`);
+            await createDiaryFile(userId);  // Ensure a diary file is created if it doesn't exist
+            return []; // Return an empty array as the user has no entries yet
+        } else {
+            // If the file exists, read and parse it
+            const result = await FileSystem.readAsStringAsync(filePath);
+            const diary = JSON.parse(result);
+            return diary.entries; // Return the list of entries
+        }
+    } catch (error) {
+        console.error(`Error retrieving diary entries for user ${userId}:`, error);
+        throw error; // Rethrow or handle the error as needed
+    }
 };
 
 // Function to download and save an image from a URL

@@ -2,7 +2,7 @@ import { FlatList, Pressable, SafeAreaView, View, useWindowDimensions } from "re
 import { Divider, Icon, IconButton, Text, useTheme } from "react-native-paper";
 import { getAuth } from "firebase/auth";
 import { getDiaryEntries, deleteDiaryEntry } from "../../utilities/diaryManager";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { DiaryContext } from "../../context/diaryContext";
 import { Image } from "expo-image";
 
@@ -11,6 +11,7 @@ export default function Diary() {
 	const { entries, setEntries } = useContext(DiaryContext);
 	const [selectedEntryId, setSelectedEntryId] = useState(null);
 	const { width } = useWindowDimensions();
+	const flatListRef = useRef();
 	const imageSize = width * 0.85;
 	const blurhash =
 		"|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
@@ -23,7 +24,7 @@ export default function Diary() {
 		const fetchEntries = async () => {
 			if (user) {
 				const fetchedEntries = await getDiaryEntries(user.uid);
-				setEntries(fetchedEntries);
+				setEntries(fetchedEntries.reverse());
 			}
 		};
 
@@ -45,10 +46,12 @@ export default function Diary() {
 	}, [entries, isDeleting]);
 
 	const handleSelect = (id) => {
+		const index = entries.findIndex((entry) => entry.id === id);
 		if (selectedEntryId === id) {
 			setSelectedEntryId(null);
 		} else {
 			setSelectedEntryId(id);
+			flatListRef.current.scrollToIndex({ animated: true, index: index });
 		}
 	};
 
@@ -131,6 +134,7 @@ export default function Diary() {
 				backgroundColor: theme.colors.background,
 			}}>
 			<FlatList
+				ref={flatListRef}
 				style={{ flex: 1, minWidth: "100%", padding: 15 }}
 				data={entries}
 				renderItem={renderEntry}
