@@ -24,7 +24,7 @@ export default function Diary() {
 		const fetchEntries = async () => {
 			if (user) {
 				const fetchedEntries = await getDiaryEntries(user.uid);
-				setEntries(fetchedEntries.reverse());
+				setEntries(fetchedEntries);
 			}
 		};
 
@@ -58,48 +58,56 @@ export default function Diary() {
 	const InnerEntry = ({ item }) => {
 		if (selectedEntryId == item.id) {
 			return (
-				<>
+				<View style={{ flex: 1, gap: 10, alignItems: "center", paddingHorizontal: 15, paddingBottom: 15 }}>
 					<Image
 						source={item.imagePath}
 						placeholder={{ blurhash }}
-						contentFit="contain"
-						style={{ width: imageSize, height: imageSize, borderRadius: 5 }}
+						contentFit="fill"
+						style={{ minWidth: imageSize, minHeight: imageSize, borderRadius: 5 }}
 						transition={1000}
 					/>
 					<Divider bold style={{ width: "100%" }} />
 					<Text style={{ paddingHorizontal: 5 }}>{item.text.toString()}</Text>
-				</>
+				</View>
 			);
 		} else {
 			return null;
 		}
 	};
 
-	const handleDelete = async ({ id }) => {
+	const handleDelete = async (id) => {
 		setIsDeleting(true);
 		const auth = getAuth();
 		const user = auth.currentUser;
-		const entryIndex = entries.indexOf(id);
-		await deleteDiaryEntry(user.uid, entryIndex);
+		const entryIndex = entries.findIndex((entry) => entry.id === id);
+		if (entryIndex !== -1) {
+			console.log("Current open entry:", selectedEntryId)
+			console.log("Sending entry for deletion:", entryIndex)
+			await deleteDiaryEntry(user.uid, entryIndex);
+		} else {
+			console.error("Entry not found for deletion");
+		}
 	};
 
 	const renderEntry = ({ item }) => {
 		return (
-			<>
+			<View
+				style={{
+					flex: 1,
+					width: width - 20,
+					paddingTop: 5,
+					margin: 5,
+				}}>
 				<Pressable
 					style={{
 						flex: 1,
 						backgroundColor: theme.colors.surfaceVariant,
-						gap: 10,
-						padding: 15,
-						justifyContent: "center",
-						alignItems: "center",
 						borderRadius: 5,
 					}}>
-					<View style={{ flex: 1, width: "100%", flexDirection: "row" }}>
+					<View style={{ flex: 1, flexDirection: "row" }}>
 						<Pressable
 							onPress={() => handleSelect(item.id)}
-							style={{ flex: 1, flexDirection: "row", alignItems: "center", width: imageSize }}>
+							style={{ flex: 1, flexDirection: "row", marginLeft: 10, alignItems: "center", width: imageSize }}>
 							<Icon
 								size={24}
 								source={selectedEntryId == item.id ? "chevron-down" : "chevron-up"}
@@ -120,8 +128,7 @@ export default function Diary() {
 					</View>
 					<InnerEntry item={item} />
 				</Pressable>
-				<Divider style={{ width: "100%", marginVertical: 20 }} />
-			</>
+			</View>
 		);
 	};
 
@@ -135,7 +142,6 @@ export default function Diary() {
 			}}>
 			<FlatList
 				ref={flatListRef}
-				style={{ flex: 1, minWidth: "100%", padding: 15 }}
 				data={entries}
 				renderItem={renderEntry}
 				keyExtractor={(item) => item.id.toString()}

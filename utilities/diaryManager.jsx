@@ -7,9 +7,9 @@ const diaryDirectory = FileSystem.documentDirectory + "diaries/";
 
 // Function to generate a unique identifier using a timestamp and a random number
 const generateUniqueId = () => {
-    const timestamp = new Date().getTime(); // Get current timestamp
-    const random = Math.floor(Math.random() * 10000); // Generate a random number
-    return `${timestamp}-${random}`; // Combine them to form a unique ID
+	const timestamp = new Date().getTime(); // Get current timestamp
+	const random = Math.floor(Math.random() * 10000); // Generate a random number
+	return `${timestamp}-${random}`; // Combine them to form a unique ID
 };
 
 // Ensure the diary directory exists, create if it does not
@@ -18,7 +18,7 @@ const ensureDiaryDirectoryExists = async () => {
 	if (!dir.exists) {
 		await FileSystem.makeDirectoryAsync(diaryDirectory, { intermediates: true });
 	} else {
-		return
+		return;
 	}
 };
 
@@ -50,15 +50,16 @@ export const addDiaryEntry = async (userId, entry, imageUrl) => {
 
 // Delete a specific entry from a user's diary
 export const deleteDiaryEntry = async (userId, entryIndex) => {
-	 console.log("Starting delete of entry:", entryIndex, "for user", userId)
+	console.log("Starting delete of entry:", entryIndex, "for user", userId);
 	const filePath = diaryDirectory + `${userId}.json`;
 	const result = await FileSystem.readAsStringAsync(filePath);
 	const diary = JSON.parse(result);
-	if (diary.entries.length > entryIndex) {
-		// Ensure the entry exists
-		diary.entries.splice(entryIndex, 1); // Remove the entry
-		console.log("entry deleted")
+	if (entryIndex !== -1) {
+		diary.entries.splice(entryIndex, 1);
+		console.log("Entry deleted:", entryIndex);
 		await FileSystem.writeAsStringAsync(filePath, JSON.stringify(diary));
+	} else {
+		console.error("Entry not found for deletion");
 	}
 };
 
@@ -71,24 +72,24 @@ export const clearAllDiaryEntries = async (userId) => {
 
 // Retrieve all entries from a user's diary
 export const getDiaryEntries = async (userId) => {
-    const filePath = `${diaryDirectory}${userId}.json`;
-    try {
-        const file = await FileSystem.getInfoAsync(filePath);
-        if (!file.exists) {
-            // Handle case when diary file doesn't exist
-            console.log(`No diary file found for user ${userId}, initializing new diary.`);
-            await createDiaryFile(userId);  // Ensure a diary file is created if it doesn't exist
-            return []; // Return an empty array as the user has no entries yet
-        } else {
-            // If the file exists, read and parse it
-            const result = await FileSystem.readAsStringAsync(filePath);
-            const diary = JSON.parse(result);
-            return diary.entries; // Return the list of entries
-        }
-    } catch (error) {
-        console.error(`Error retrieving diary entries for user ${userId}:`, error);
-        throw error; // Rethrow or handle the error as needed
-    }
+	const filePath = `${diaryDirectory}${userId}.json`;
+	try {
+		const file = await FileSystem.getInfoAsync(filePath);
+		if (!file.exists) {
+			// Handle case when diary file doesn't exist
+			console.log(`No diary file found for user ${userId}, initializing new diary.`);
+			await createDiaryFile(userId); // Ensure a diary file is created if it doesn't exist
+			return []; // Return an empty array as the user has no entries yet
+		} else {
+			// If the file exists, read and parse it
+			const result = await FileSystem.readAsStringAsync(filePath);
+			const diary = JSON.parse(result);
+			return diary.entries; // Return the list of entries
+		}
+	} catch (error) {
+		console.error(`Error retrieving diary entries for user ${userId}:`, error);
+		throw error; // Rethrow or handle the error as needed
+	}
 };
 
 // Function to download and save an image from a URL
