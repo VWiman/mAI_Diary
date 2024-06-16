@@ -1,7 +1,7 @@
 // IMPORTANT: ChatGPT used to create comments
 
 // Importing required modules and components
-import { View, useWindowDimensions } from "react-native";
+import { View, useWindowDimensions, Keyboard } from "react-native";
 import { useTheme, Button, TextInput } from "react-native-paper";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useState, useContext } from "react";
@@ -24,6 +24,7 @@ export default function Login() {
 	// Handle user login
 	const handleLogin = () => {
 		setIsLoading(true); // Start loading
+		Keyboard.dismiss(true);
 		signInWithEmailAndPassword(getAuth(), email, password)
 			.then(async (userCredential) => {
 				const user = userCredential.user;

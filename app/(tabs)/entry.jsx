@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView, View, useWindowDimensions } from "react-native";
-import { Button, TextInput, useTheme } from "react-native-paper";
+import { Keyboard, SafeAreaView, View, useWindowDimensions } from "react-native";
+import { Button, TextInput, useTheme, Surface, SegmentedButtons, Text } from "react-native-paper";
 import DismissKeyboard from "../../components/dismissKeyboard";
 import { useContext } from "react";
 import { ApiContext } from "../../context/apiContext";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAuth } from "firebase/auth";
 
 export default function Entry() {
 	const theme = useTheme();
@@ -20,11 +22,63 @@ export default function Entry() {
 	const [weather, setWeather] = useState("");
 	const [imageGenerating, setImageGenerating] = useState(false);
 	const [message, setMessage] = useState("");
+	const [gender, setGender] = useState("");
+	const [name, setName] = useState("");
 	const dateTime = new Date().toDateString();
 	const router = useRouter();
+	const auth = getAuth();
+	const user = auth.currentUser;
 
 	const [adress, setAdress] = useState(null);
 	const [errorMsg, setErrorMsg] = useState(null);
+
+	useEffect(() => {
+		(async () => {
+			try {
+				const loadedOptions = await getOptions();
+				if (loadedOptions) {
+					setGender(loadedOptions.gender);
+					setName(loadedOptions.name)
+				}
+			} catch (e) {
+				console.log(e);
+			}
+		})();
+	}, []);
+
+	useEffect(() => {
+		(async () => {
+			try {
+				const userOptions = {
+					gender: gender,
+					name: name,
+				};
+				await storeOptions(userOptions);
+			} catch (e) {
+				console.log(e);
+			}
+		})();
+	}, [gender, name]);
+
+	const storeOptions = async (userOptions) => {
+		try {
+			const jsonOptions = JSON.stringify(userOptions);
+			await AsyncStorage.setItem(user.uid, jsonOptions);
+			console.log("Saved options");
+		} catch (e) {
+			console.log(e);
+		}
+	};
+
+	const getOptions = async () => {
+		try {
+			const jsonOptions = await AsyncStorage.getItem(user.uid);
+			console.log("Loaded options");
+			return jsonOptions != null ? JSON.parse(jsonOptions) : null;
+		} catch (e) {
+			console.log(e);
+		}
+	};
 
 	useEffect(() => {
 		(async () => {
@@ -106,7 +160,7 @@ export default function Entry() {
 				body: JSON.stringify({
 					model: "gpt-4o",
 					temperature: 0.2,
-					max_tokens: 500,
+					max_tokens: 600,
 					messages: [
 						{
 							role: "user",
@@ -114,8 +168,7 @@ export default function Entry() {
 						},
 						{
 							role: "system",
-							content:
-								"You are ghostwriting a diary. The user will provide details about their day, and your task is to transform these details into a well written basic diary entry.",
+							content: `You are ghostwriting a diary. The user is named ${name} and identify as ${gender} will provide details about their day, and your task is to transform these details into a well written basic accurate diary entry.`,
 						},
 
 						{
@@ -162,9 +215,9 @@ export default function Entry() {
 		}
 
 		const prompt = apiResponse.toString();
-		const stringPrompt = prompt.slice(0, 160);
+		const stringPrompt = prompt.slice(0, 240);
 		const finalStringPrompt = stringPrompt
-			? "I NEED to test how the tool works with dynamic prompts. MAKE SURE revised prompt does NOT generate TEXT or NUMBERS: In a style for G – General Audiences, coherent and well made detailed fine art oil painting, In the mood of " +
+			? `I NEED to test how the tool works with dynamic prompts. If you include people in revised prompt MAKE SURE they are: ${gender}, MAKE SURE revised prompt does NOT generate TEXT, ONLY use prompts that AVOID that: In a style for G – General Audiences, coherent and well made detailed fine art oil painting, In the mood of ` +
 			  mood +
 			  " Location is " +
 			  adress[0].country +
@@ -218,7 +271,9 @@ export default function Entry() {
 	function handleSubmit(e) {
 		e.preventDefault();
 		console.log(dateTime);
+		Keyboard.dismiss(true);
 		handleSend();
+		setText("");
 	}
 
 	function handleDisplayResult() {
@@ -234,7 +289,7 @@ export default function Entry() {
 						width: "100%",
 						paddingHorizontal: width / 10,
 						paddingVertical: height / 30,
-						gap: 10,
+						gap: 20,
 						alignItems: "center",
 						backgroundColor: theme.colors.background,
 					}}>
@@ -245,13 +300,11 @@ export default function Entry() {
 						}}
 						autoCapitalize="sentence"
 						mode="flat"
-						label="Mood"
-						placeholder="How did you feel today?"
+						label="Name"
 						maxLength={20}
-						value={mood}
-						onChangeText={(mood) => setMood(mood)}
-					/>
-					<TextInput
+						value={name}
+						onChangeText={(name) => setName(name)}
+					/><TextInput
 						style={{
 							minWidth: "100%",
 							backgroundColor: theme.colors.background,
@@ -271,6 +324,45 @@ export default function Entry() {
 							setText(text);
 						}}
 					/>
+					<Text style={{ fontWeight: 700 }} variant="bodyLarge">
+						I identify as
+					</Text>
+					<SegmentedButtons
+						theme={theme}
+						value={gender}
+						onValueChange={setGender}
+						buttons={[
+							{
+								value: "man",
+								label: "Male",
+							},
+							{
+								value: "woman",
+								label: "Female",
+							},
+							{ value: "non-Binary", label: "Enby" },
+						]}
+					/>
+					<Text style={{ fontWeight: 700 }} variant="bodyLarge">
+						Today I am feeling
+					</Text>
+					<SegmentedButtons
+						theme={theme}
+						value={mood}
+						onValueChange={setMood}
+						buttons={[
+							{
+								value: "bad",
+								label: "Bad",
+							},
+							{
+								value: "ok",
+								label: "Ok",
+							},
+							{ value: "good", label: "Good" },
+						]}
+					/>
+					
 
 					{displayResult && !isFetching ? (
 						<Button style={{ width: 125 }} mode="contained" onPress={handleDisplayResult} disabled={!displayResult}>
@@ -281,7 +373,7 @@ export default function Entry() {
 							style={{ width: 125 }}
 							mode="contained"
 							onPress={handleSubmit}
-							disabled={isFetching}
+							disabled={isFetching || message === ""}
 							loading={isFetching}>
 							{isFetching ? "Loading" : "Submit"}
 						</Button>

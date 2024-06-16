@@ -1,7 +1,7 @@
 // IMPORTANT: ChatGPT used to create comments
 
 // Imports necessary components, hooks, and utilities
-import { View, useWindowDimensions } from "react-native";
+import { Keyboard, View, useWindowDimensions } from "react-native";
 import { useTheme, Button, TextInput } from "react-native-paper";
 import { getAuth, createUserWithEmailAndPassword, deleteUser, signOut } from "firebase/auth";
 import { useState, useContext } from "react";
@@ -23,6 +23,7 @@ export default function Register() {
 	// Function to handle user registration
 	const handleRegister = () => {
 		setIsLoading(true); // Sets loading state to true during registration process
+		Keyboard.dismiss(true);
 		createUserWithEmailAndPassword(getAuth(), email, password)
 			.then(async (userCredential) => {
 				const user = userCredential.user; // Gets user data from user credential
