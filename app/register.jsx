@@ -1,6 +1,3 @@
-// IMPORTANT: ChatGPT used to create comments
-
-// Imports necessary components, hooks, and utilities
 import { Keyboard, View, useWindowDimensions } from "react-native";
 import { useTheme, Button, TextInput } from "react-native-paper";
 import { getAuth, createUserWithEmailAndPassword, deleteUser, signOut } from "firebase/auth";
@@ -10,31 +7,27 @@ import { StateContext } from "../context/stateContext";
 import { Spinner } from "../components/spinner";
 import { createDiaryFile } from "../utilities/diaryManager";
 
-// Defines the main functional component for user registration
 export default function Register() {
-	// Hooks for using the theme, router, and state context
 	const theme = useTheme();
 	const router = useRouter();
-	const [email, setEmail] = useState(""); // State for managing email input
-	const [password, setPassword] = useState(""); // State for managing password input
-	const { width } = useWindowDimensions(); // Gets window dimensions for responsive design
-	const { isLoading, setIsLoading } = useContext(StateContext); // Context for managing loading state
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const { width } = useWindowDimensions();
+	const { isLoading, setIsLoading } = useContext(StateContext);
 
-	// Function to handle user registration
 	const handleRegister = () => {
-		setIsLoading(true); // Sets loading state to true during registration process
+		setIsLoading(true);
 		Keyboard.dismiss(true);
 		createUserWithEmailAndPassword(getAuth(), email, password)
 			.then(async (userCredential) => {
-				const user = userCredential.user; // Gets user data from user credential
+				const user = userCredential.user;
 				try {
-					await createDiaryFile(user.uid); // Attempts to create a diary file for the user
+					await createDiaryFile(user.uid);
 					console.log(`Registration successful for ${user.uid} and diary created and saved.`);
 					signOut(getAuth());
-					router.navigate("/landing"); // Navigates to login page on successful registration
+					router.navigate("/landing"); 
 				} catch (error) {
 					console.error("Could not create diary file:", error);
-					// Deletes the user if the diary file cannot be created
 					deleteUser(user)
 						.then(() => {
 							alert("Failed to create your diary. Please allow the app to access your files and try again.");
@@ -44,16 +37,15 @@ export default function Register() {
 							console.error("Failed to delete the user after diary creation failed:", delErr);
 						});
 				}
-				setIsLoading(false); // Sets loading state to false once the registration process is complete
+				setIsLoading(false);
 			})
 			.catch((err) => {
 				console.error("Registration failed:", err);
-				alert(err?.message); // Shows error message if registration fails
-				setIsLoading(false); // Sets loading state to false on failure
+				alert(err?.message);
+				setIsLoading(false);
 			});
 	};
 
-	// Renders the registration form
 	return (
 		<View
 			style={{
@@ -69,15 +61,15 @@ export default function Register() {
 					autoCapitalize="none"
 					label="Email"
 					keyboardType="email-address"
-					onChangeText={(text) => setEmail(text)} // Updates email state on text change
-					disabled={isLoading} // Disables input while loading
+					onChangeText={(text) => setEmail(text)}
+					disabled={isLoading}
 				/>
 				<TextInput
 					autoCapitalize="none"
 					label="Password"
 					secureTextEntry={true}
-					onChangeText={(text) => setPassword(text)} // Updates password state on text change
-					disabled={isLoading} // Disables input while loading
+					onChangeText={(text) => setPassword(text)}
+					disabled={isLoading}
 				/>
 			</View>
 

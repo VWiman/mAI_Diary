@@ -6,7 +6,7 @@ import Svg, { G, Circle, Path, Defs } from "react-native-svg";
 export default function LandingScreen() {
 	const router = useRouter();
 	const theme = useTheme();
-	const { width, height } = useWindowDimensions();
+	const { height } = useWindowDimensions();
 
 	const SvgComponent = (props) => (
 		<Svg

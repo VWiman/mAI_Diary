@@ -22,7 +22,6 @@ export default function Entry() {
 	const [weather, setWeather] = useState("");
 	const [imageGenerating, setImageGenerating] = useState(false);
 	const [message, setMessage] = useState("");
-	const [gender, setGender] = useState("");
 	const [name, setName] = useState("");
 	const dateTime = new Date().toDateString();
 	const router = useRouter();
@@ -37,8 +36,7 @@ export default function Entry() {
 			try {
 				const loadedOptions = await getOptions();
 				if (loadedOptions) {
-					setGender(loadedOptions.gender);
-					setName(loadedOptions.name)
+					setName(loadedOptions.name);
 				}
 			} catch (e) {
 				console.log(e);
@@ -50,7 +48,6 @@ export default function Entry() {
 		(async () => {
 			try {
 				const userOptions = {
-					gender: gender,
 					name: name,
 				};
 				await storeOptions(userOptions);
@@ -58,7 +55,7 @@ export default function Entry() {
 				console.log(e);
 			}
 		})();
-	}, [gender, name]);
+	}, [name]);
 
 	const storeOptions = async (userOptions) => {
 		try {
@@ -168,7 +165,7 @@ export default function Entry() {
 						},
 						{
 							role: "system",
-							content: `You are ghostwriting a diary. The user is named ${name} and identify as ${gender} will provide details about their day, and your task is to transform these details into a well written basic accurate diary entry.`,
+							content: `You are ghostwriting a diary. The user is named ${name} and will provide details about their day, and your task is to transform these details into a well written basic accurate diary entry.`,
 						},
 
 						{
@@ -217,7 +214,7 @@ export default function Entry() {
 		const prompt = apiResponse.toString();
 		const stringPrompt = prompt.slice(0, 240);
 		const finalStringPrompt = stringPrompt
-			? `I NEED to test how the tool works with dynamic prompts. If you include people in revised prompt MAKE SURE they are: ${gender}, MAKE SURE revised prompt does NOT generate TEXT, ONLY use prompts that AVOID that: In a style for G – General Audiences, coherent and well made detailed fine art oil painting, In the mood of ` +
+			? `I NEED to test how the tool works with dynamic prompts. MAKE SURE revised prompt does NOT generate TEXT or People, ONLY use prompts that AVOID that: In a style for G – General Audiences, coherent and well made detailed fine art oil painting, In the mood of ` +
 			  mood +
 			  " Location is " +
 			  adress[0].country +
@@ -254,7 +251,6 @@ export default function Entry() {
 			if (imageResponse.ok) {
 				setIsFetching(false);
 				setImageGenerating(false);
-				console.log(imageData);
 				setImageApiResponse(imageData.data[0].url);
 			} else {
 				setIsFetching(false);
@@ -304,7 +300,8 @@ export default function Entry() {
 						maxLength={20}
 						value={name}
 						onChangeText={(name) => setName(name)}
-					/><TextInput
+					/>
+					<TextInput
 						style={{
 							minWidth: "100%",
 							backgroundColor: theme.colors.background,
@@ -325,25 +322,6 @@ export default function Entry() {
 						}}
 					/>
 					<Text style={{ fontWeight: 700 }} variant="bodyLarge">
-						I identify as
-					</Text>
-					<SegmentedButtons
-						theme={theme}
-						value={gender}
-						onValueChange={setGender}
-						buttons={[
-							{
-								value: "man",
-								label: "Male",
-							},
-							{
-								value: "woman",
-								label: "Female",
-							},
-							{ value: "non-Binary", label: "Enby" },
-						]}
-					/>
-					<Text style={{ fontWeight: 700 }} variant="bodyLarge">
 						Today I am feeling
 					</Text>
 					<SegmentedButtons
@@ -362,7 +340,6 @@ export default function Entry() {
 							{ value: "good", label: "Good" },
 						]}
 					/>
-					
 
 					{displayResult && !isFetching ? (
 						<Button style={{ width: 125 }} mode="contained" onPress={handleDisplayResult} disabled={!displayResult}>

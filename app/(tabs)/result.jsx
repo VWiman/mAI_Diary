@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, View, useWindowDimensions } from "react-native";
 import { Button, Divider, Surface, Text, useTheme } from "react-native-paper";
 import { ApiContext } from "../../context/apiContext";
@@ -15,11 +15,13 @@ export default function Result() {
 	const { displayResult, setDisplayResult, imageApiResponse, setImageApiResponse } = useContext(ApiContext);
 	const imageSize = width * 0.85;
 	const dateTime = new Date().toDateString();
+	const [imageToRender, setImageToRender] = useState(null)
 	const blurhash =
 		"|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
 	useEffect(() => {
 		console.log("Image API Response set", imageApiResponse);
+		setImageToRender(imageApiResponse)
 		return () => {
 			console.log("Component unmounting or re-rendering, current image API Response", imageApiResponse);
 		};
@@ -28,10 +30,10 @@ export default function Result() {
 	const RenderedImage = () => {
 		return (
 			<Image
-				source={imageApiResponse}
+				source={imageToRender}
 				placeholder={{ blurhash }}
-				contentFit="contain"
-				style={{ width: imageSize, height: imageSize, borderRadius: 5 }}
+				contentFit="fill"
+				style={{ minWidth: imageSize, minHeight: imageSize, borderRadius: 5 }}
 				transition={1000}
 			/>
 		);
