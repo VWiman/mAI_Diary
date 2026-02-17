@@ -54,6 +54,7 @@ Notes:
 
 ## Screenshots
 
+<div style="display: flex;">
 <div align="center">
   <img src="assets/info/a.png" alt="Creating an entry" width="25%" />
   <p><em>Creating an entry</em></p>
@@ -62,6 +63,7 @@ Notes:
 <div align="center">
   <img src="assets/info/b.png" alt="Example result" width="25%" />
   <p><em>Example result</em></p>
+</div>
 </div>
 
 ## Getting started
