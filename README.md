@@ -117,11 +117,5 @@ Example result:
 - `npm run reset-project` is defined but `scripts/reset-project.js` does not exist.
 - `npm test` is configured (`jest --watchAll`), but there are currently no test files.
 - API keys are used directly from the client app (`EXPO_PUBLIC_*`), which is not secure for production.
-- Some UI/logic is still prototype-level (minimal validation/error handling).
-
-## Suggested next cleanup steps
-
-1. Move OpenAI and weather requests behind a backend API.
-2. Migrate diary persistence to a remote database with sync.
-3. Add basic automated tests for auth flow and diary manager utilities.
-4. Remove dead scripts and update dependencies to current Expo SDK.
+- Weather is fetched via `http://api.weatherapi.com/...` instead of HTTPS.
+- Some UI/logic and logging are still prototype-level (minimal validation/error handling).
