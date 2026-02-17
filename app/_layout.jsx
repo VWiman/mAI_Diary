@@ -3,11 +3,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { MD3LightTheme as DefaultTheme, PaperProvider } from "react-native-paper";
-import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import SpaceMono from "../assets/fonts/SpaceMono-Regular.ttf";
-import { StateProvider } from "../context/stateContext";
 import { StatusBar } from "react-native";
 
 const firebaseConfig = {
@@ -20,10 +19,15 @@ const firebaseConfig = {
 	measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-initializeAuth(app, {
-	persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+try {
+	initializeAuth(app, {
+		persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+	});
+} catch {
+	// Auth was already initialized (e.g. after fast refresh); reuse existing instance.
+	getAuth(app);
+}
 
 export { ErrorBoundary } from "expo-router";
 
@@ -54,9 +58,7 @@ export default function RootLayout() {
 	}
 
 	return (
-		<StateProvider>
-			<RootLayoutNav />
-		</StateProvider>
+		<RootLayoutNav />
 	);
 }
 

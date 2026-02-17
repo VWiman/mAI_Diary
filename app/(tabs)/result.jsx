@@ -20,11 +20,7 @@ export default function Result() {
 		"|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
 	useEffect(() => {
-		console.log("Image API Response set", imageApiResponse);
 		setImageToRender(imageApiResponse)
-		return () => {
-			console.log("Component unmounting or re-rendering, current image API Response", imageApiResponse);
-		};
 	}, [imageApiResponse]);
 
 	const RenderedImage = () => {

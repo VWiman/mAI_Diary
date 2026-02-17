@@ -1,4 +1,4 @@
-# mAI Diary (Legacy Project)
+# mAI Diary
 
 This repository contains an older Expo React Native app for AI-assisted diary writing.
 
@@ -9,7 +9,7 @@ The app flow is:
 3. Fetch location + weather context.
 4. Generate diary text (OpenAI Chat Completions).
 5. Generate an image (OpenAI Images API).
-6. Save the entry locally as JSON plus downloaded image files.
+6. Save the entry locally (native: JSON + downloaded image files, web: AsyncStorage + image URLs).
 
 ## Project status
 
@@ -21,7 +21,7 @@ This project is old and not actively maintained. Dependencies and API usage are 
 - Expo Router (file-based routing)
 - React Native Paper UI
 - Firebase Auth (email/password)
-- Expo FileSystem (local diary storage)
+- Expo FileSystem + AsyncStorage fallback (local diary storage)
 - OpenAI API (text + image generation)
 - WeatherAPI (daily weather context)
 - Expo Location + AsyncStorage
@@ -88,19 +88,28 @@ app/
     entry.jsx              # New entry form + API calls
     result.jsx             # Review and save generated result
 context/
-  stateContext.jsx         # Global loading state
   diaryContext.jsx         # Diary entries and save state
   apiContext.jsx           # API keys and generation state
 utilities/
-  diaryManager.jsx         # Local JSON diary + image download helpers
+  diaryManager.jsx         # Native FS diary + web AsyncStorage fallback
 ```
+
+## Screenshots
+
+Creating an entry:
+![Creating an entry](assets/info/a.png)
+
+Example result:
+![Example result](assets/info/b.png)
 
 ## Data storage behavior
 
-- Diary entries are stored per-user in Expo FileSystem under:
+- Native (iOS/Android): diary entries are stored per-user in Expo FileSystem under:
   - `FileSystem.documentDirectory + "diaries/<uid>.json"`
-- Entry images are downloaded and stored locally under:
+- Native (iOS/Android): entry images are downloaded and stored locally under:
   - `FileSystem.documentDirectory + "diaries/<uid>/"`.
+- Web: diary entries are stored per-user in AsyncStorage under keys like `diary:<uid>`.
+- Web: image paths are stored as generated image URLs (no file download).
 - Data is local to the device/app install (not synced to Firestore/DB).
 
 ## Known issues and outdated parts
@@ -108,8 +117,7 @@ utilities/
 - `npm run reset-project` is defined but `scripts/reset-project.js` does not exist.
 - `npm test` is configured (`jest --watchAll`), but there are currently no test files.
 - API keys are used directly from the client app (`EXPO_PUBLIC_*`), which is not secure for production.
-- Weather is fetched via `http://api.weatherapi.com/...` instead of HTTPS.
-- Some UI/logic and logging are still prototype-level (minimal validation/error handling).
+- Some UI/logic is still prototype-level (minimal validation/error handling).
 
 ## Suggested next cleanup steps
 

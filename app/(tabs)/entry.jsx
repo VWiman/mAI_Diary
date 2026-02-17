@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Keyboard, SafeAreaView, View, useWindowDimensions } from "react-native";
-import { Button, TextInput, useTheme, Surface, SegmentedButtons, Text } from "react-native-paper";
+import { Button, TextInput, useTheme, SegmentedButtons, Text } from "react-native-paper";
 import DismissKeyboard from "../../components/dismissKeyboard";
-import { useContext } from "react";
 import { ApiContext } from "../../context/apiContext";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
@@ -17,8 +16,10 @@ export default function Entry() {
 		useContext(ApiContext);
 	const [mood, setMood] = useState("");
 	const [text, setText] = useState("");
-	const [lat, setLat] = useState(0);
-	const [lon, setLon] = useState(0);
+	const [lat, setLat] = useState(null);
+	const [lon, setLon] = useState(null);
+	const [hasLocation, setHasLocation] = useState(false);
+	const [locationDetails, setLocationDetails] = useState({ region: "", country: "" });
 	const [weather, setWeather] = useState("");
 	const [imageGenerating, setImageGenerating] = useState(false);
 	const [message, setMessage] = useState("");
@@ -28,95 +29,102 @@ export default function Entry() {
 	const auth = getAuth();
 	const user = auth.currentUser;
 
-	const [adress, setAdress] = useState(null);
-	const [errorMsg, setErrorMsg] = useState(null);
-
 	useEffect(() => {
 		(async () => {
 			try {
 				const loadedOptions = await getOptions();
-				if (loadedOptions) {
+				if (loadedOptions?.name) {
 					setName(loadedOptions.name);
 				}
-			} catch (e) {
-				console.log(e);
+			} catch (error) {
+				console.error("Failed to load options:", error);
 			}
 		})();
-	}, []);
+	}, [user?.uid]);
 
 	useEffect(() => {
+		if (!user?.uid) {
+			return;
+		}
+
 		(async () => {
 			try {
-				const userOptions = {
-					name: name,
-				};
-				await storeOptions(userOptions);
-			} catch (e) {
-				console.log(e);
+				await storeOptions({ name });
+			} catch (error) {
+				console.error("Failed to store options:", error);
 			}
 		})();
-	}, [name]);
+	}, [name, user?.uid]);
 
 	const storeOptions = async (userOptions) => {
-		try {
-			const jsonOptions = JSON.stringify(userOptions);
-			await AsyncStorage.setItem(user.uid, jsonOptions);
-			console.log("Saved options");
-		} catch (e) {
-			console.log(e);
+		if (!user?.uid) {
+			return;
 		}
+
+		const jsonOptions = JSON.stringify(userOptions);
+		await AsyncStorage.setItem(user.uid, jsonOptions);
 	};
 
 	const getOptions = async () => {
-		try {
-			const jsonOptions = await AsyncStorage.getItem(user.uid);
-			console.log("Loaded options");
-			return jsonOptions != null ? JSON.parse(jsonOptions) : null;
-		} catch (e) {
-			console.log(e);
+		if (!user?.uid) {
+			return null;
 		}
+
+		const jsonOptions = await AsyncStorage.getItem(user.uid);
+		return jsonOptions != null ? JSON.parse(jsonOptions) : null;
 	};
 
 	useEffect(() => {
-		(async () => {
-			let { status } = await Location.requestForegroundPermissionsAsync();
-			if (status !== "granted") {
-				setErrorMsg("Permission to access location was denied");
-				alert(errorMsg);
-				return;
-			}
+		let ignore = false;
 
-			let location = await Location.getCurrentPositionAsync({});
-			console.log(location);
-			setLat(location.coords.latitude);
-			setLon(location.coords.longitude);
-			let adress = await Location.reverseGeocodeAsync(location.coords);
-			setAdress(adress);
-			console.log(adress);
+		(async () => {
+			try {
+				const { status } = await Location.requestForegroundPermissionsAsync();
+				if (status !== "granted") {
+					alert("Permission to access location was denied");
+					return;
+				}
+
+				const location = await Location.getCurrentPositionAsync({});
+				if (ignore) {
+					return;
+				}
+
+				const latitude = location.coords.latitude;
+				const longitude = location.coords.longitude;
+				setLat(latitude);
+				setLon(longitude);
+				setHasLocation(true);
+				await handleWeather(latitude, longitude);
+			} catch (error) {
+				console.error("Failed to fetch location:", error);
+			}
 		})();
+
+		return () => {
+			ignore = true;
+		};
 	}, []);
 
 	useEffect(() => {
-		if (adress) {
-			handleWeather();
-		}
-	}, [adress]);
-
-	useEffect(() => {
 		setDisplayResult(apiResponse);
-	}, [apiResponse]);
+	}, [apiResponse, setDisplayResult]);
 
 	useEffect(() => {
 		if (displayResult && isFetching && !imageGenerating) {
 			setImageGenerating(true);
 			handleImage();
 		}
-	}, [displayResult, isFetching]);
+	}, [displayResult, isFetching, imageGenerating]);
 
-	async function handleWeather() {
+	async function handleWeather(latitude = lat, longitude = lon) {
+		if (!weatherApiKey || latitude == null || longitude == null) {
+			return;
+		}
+
 		try {
 			const response = await fetch(
-				`http://api.weatherapi.com/v1/forecast.json?key=${weatherApiKey}&q=${lat},${lon}&days=1&aqi=no&alerts=no`
+				`https://api.weatherapi.com/v1/forecast.json?key=${weatherApiKey}&q=${latitude},${longitude}&days=1&aqi=no&alerts=no`
 			);
 
 			const data = await response.json();
@@ -129,25 +137,32 @@ export default function Entry() {
 				const totalPrecipitation = parsedResponse.totalprecip_mm;
 				const maxWind = parsedResponse.maxwind_kph;
 				const weatherRaw = `Weather today was overall ${conditions}. Max temp was ${maxTemp} degrees celcius. Average temp was ${avgTemp} degrees celcius. Total precipitation today was ${totalPrecipitation} mm. Max wind today was ${maxWind} kph.`;
-				const weatherString = weatherRaw.toString();
-				setWeather(weatherString);
+				setWeather(weatherRaw.toString());
+				setLocationDetails({
+					region: data.location?.region || data.location?.name || "Unknown region",
+					country: data.location?.country || "Unknown country",
+				});
 			} else {
 				console.error("Failed to fetch weather data:", data.error);
 			}
 		} catch (error) {
-			console.error("API request failed.", error);
+			console.error("Weather request failed:", error);
 		}
 	}
 
 	async function handleSend() {
-		if (!adress || adress.length === 0) {
+		if (!hasLocation) {
 			alert("Still fetching your location, please wait.");
 			return;
 		}
 
 		try {
 			setIsFetching(true);
-			console.log("Is sending...");
+
+			const region = locationDetails.region || "Unknown region";
+			const country = locationDetails.country || "Unknown country";
+			const weatherSummary = weather || "Weather data unavailable.";
+
 			const response = await fetch("https://api.openai.com/v1/chat/completions", {
 				method: "POST",
 				headers: {
@@ -167,14 +182,13 @@ export default function Entry() {
 							role: "system",
 							content: `You are ghostwriting a diary. The user is named ${name} and will provide details about their day, and your task is to transform these details into a well written basic accurate diary entry.`,
 						},
-
 						{
 							role: "system",
-							content: `Context: 
-							Date of this entry: ${dateTime}. 
-							Location of this entry: ${adress[0].subregion}.
-							Country of this entry: ${adress[0].country}.
-							Weather for the day of this entry: ${weather}. (Only use weather for context, only mention specifics if the weather is extreme. Only include temprature if its extreme.)
+							content: `Context:
+							Date of this entry: ${dateTime}.
+							Location of this entry: ${region}.
+							Country of this entry: ${country}.
+							Weather for the day of this entry: ${weatherSummary}. (Only use weather for context, only mention specifics if the weather is extreme. Only include temprature if its extreme.)
 							The users prevailing mood today was ${mood}. (Only let mood influence output a little bit as it is overall and not specific to any one event.)`,
 						},
 						{
@@ -189,9 +203,7 @@ export default function Entry() {
 			const data = await response.json();
 
 			if (response.ok) {
-				console.log("Got response");
 				const parsedResponse = data.choices[0].message.content;
-				console.log(parsedResponse);
 				setMessage("");
 				setApiResponse(parsedResponse);
 			} else {
@@ -199,37 +211,32 @@ export default function Entry() {
 			}
 		} catch (error) {
 			console.error("API request failed.", error);
+			setIsFetching(false);
+			setImageGenerating(false);
 			setApiResponse("Failed to send message. Please try again.");
-		} finally {
-			console.log(apiResponse);
 		}
 	}
 
 	async function handleImage() {
 		if (!apiResponse) {
 			console.error("No API response available for image generation.");
+			setIsFetching(false);
+			setImageGenerating(false);
 			return;
 		}
 
 		const prompt = apiResponse.toString();
 		const stringPrompt = prompt.slice(0, 240);
 		const finalStringPrompt = stringPrompt
-			? `I NEED to test how the tool works with dynamic prompts. MAKE SURE revised prompt does NOT generate TEXT or People, ONLY use prompts that AVOID that: In a style for G – General Audiences, coherent and well made detailed fine art oil painting, In the mood of ` +
-			  mood +
-			  " Location is " +
-			  adress[0].country +
-			  " " +
-			  stringPrompt +
-			  " Weather context: " +
-			  weather
+			? `I NEED to test how the tool works with dynamic prompts. MAKE SURE revised prompt does NOT generate TEXT or People, ONLY use prompts that AVOID that: In a style for G - General Audiences, coherent and well made detailed fine art oil painting, In the mood of ${mood} Location is ${locationDetails.country || "Unknown country"} ${stringPrompt} Weather context: ${weather}`
 			: "";
 
 		if (!finalStringPrompt) {
 			console.error("No description available for image generation.");
+			setIsFetching(false);
+			setImageGenerating(false);
 			return;
 		}
-
-		console.log(finalStringPrompt);
 
 		try {
 			const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
@@ -240,7 +247,7 @@ export default function Entry() {
 				},
 				body: JSON.stringify({
 					model: "dall-e-3",
-					prompt: stringPrompt,
+					prompt: finalStringPrompt,
 					n: 1,
 					size: "1024x1024",
 				}),
@@ -264,10 +271,8 @@ export default function Entry() {
 		}
 	}
 
-	function handleSubmit(e) {
-		e.preventDefault();
-		console.log(dateTime);
-		Keyboard.dismiss(true);
+	function handleSubmit() {
+		Keyboard.dismiss();
 		handleSend();
 		setText("");
 	}
@@ -299,7 +304,7 @@ export default function Entry() {
 						label="Name"
 						maxLength={20}
 						value={name}
-						onChangeText={(name) => setName(name)}
+						onChangeText={(nextName) => setName(nextName)}
 					/>
 					<TextInput
 						style={{
@@ -316,12 +321,12 @@ export default function Entry() {
 						maxLength={400}
 						keyboardType="twitter"
 						value={text}
-						onChangeText={(text) => {
-							setMessage(text);
-							setText(text);
+						onChangeText={(nextText) => {
+							setMessage(nextText);
+							setText(nextText);
 						}}
 					/>
-					<Text style={{ fontWeight: 700 }} variant="bodyLarge">
+					<Text style={{ fontWeight: "700" }} variant="bodyLarge">
 						Today I am feeling
 					</Text>
 					<SegmentedButtons

@@ -1,41 +1,30 @@
 import { Tabs, useRouter } from "expo-router";
-import { useContext, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useTheme, Button, Icon, Text } from "react-native-paper";
 import { Pressable, View } from "react-native";
-import { StateContext } from "../../context/stateContext";
 import { Spinner } from "../../components/spinner";
 import { DiaryProvider } from "../../context/diaryContext";
 import { ApiProvider } from "../../context/apiContext";
 
 export default function TabLayout() {
-	useEffect(() => {
-		console.log("TabLayout mounted");
-		return () => console.log("TabLayout unmounted");
-	}, []);
-	const { isLoading, setIsLoading } = useContext(StateContext);
+	const [isAuthLoading, setIsAuthLoading] = useState(true);
 	const router = useRouter();
 	const theme = useTheme();
 	const auth = getAuth();
 
 	useEffect(() => {
-		console.log("Auth object changed", auth);
-		console.log("Router object changed", router);
-
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
 			if (!user) {
-				console.log("User is signed out");
 				router.replace("/landing");
-			} else {
-				console.log("User is signed in:", user.uid);
 			}
-			setIsLoading(false);
+			setIsAuthLoading(false);
 		});
 
 		return () => unsubscribe();
 	}, [auth, router]);
 
-	if (isLoading)
+	if (isAuthLoading)
 		return (
 			<View
 				style={{
@@ -55,7 +44,7 @@ export default function TabLayout() {
 				router.navigate("/landing");
 			})
 			.catch((error) => {
-				console.log(error);
+				console.error("Logout failed:", error);
 			});
 	}
 

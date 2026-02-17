@@ -81,8 +81,6 @@ export default function Diary() {
 		const user = auth.currentUser;
 		const entryIndex = entries.findIndex((entry) => entry.id === id);
 		if (entryIndex !== -1) {
-			console.log("Current open entry:", selectedEntryId)
-			console.log("Sending entry for deletion:", entryIndex)
 			await deleteDiaryEntry(user.uid, entryIndex);
 		} else {
 			console.error("Entry not found for deletion");
@@ -122,7 +120,6 @@ export default function Diary() {
 							iconColor={theme.colors.error}
 							onPress={() => {
 								handleDelete(item.id);
-								console.log(item);
 							}}
 						/>
 					</View>
