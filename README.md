@@ -54,7 +54,7 @@ Notes:
 
 ## Screenshots
 
-<div style="display: flex;">
+<div style="display: flex; flex-direction: row;">
 <div align="center">
   <img src="assets/info/a.png" alt="Creating an entry" width="25%" />
   <p><em>Creating an entry</em></p>
