@@ -55,12 +55,12 @@ Notes:
 ## Screenshots
 
 <div align="center">
-  <img src="assets/info/a.png" alt="Creating an entry" width="50%" />
+  <img src="assets/info/a.png" alt="Creating an entry" width="25%" />
   <p><em>Creating an entry</em></p>
 </div>
 
 <div align="center">
-  <img src="assets/info/b.png" alt="Example result" width="50%" />
+  <img src="assets/info/b.png" alt="Example result" width="25%" />
   <p><em>Example result</em></p>
 </div>
 
