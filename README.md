@@ -52,6 +52,18 @@ Notes:
 - The code uses `EXPO_PUBLIC_OPEN_API_KEY` (not `EXPO_PUBLIC_OPENAI_API_KEY`).
 - `EXPO_PUBLIC_*` variables are bundled into the client app by Expo.
 
+## Screenshots
+
+<div align="center">
+  <img src="assets/info/a.png" alt="Creating an entry" width="50%" />
+  <p><em>Creating an entry</em></p>
+</div>
+
+<div align="center">
+  <img src="assets/info/b.png" alt="Example result" width="50%" />
+  <p><em>Example result</em></p>
+</div>
+
 ## Getting started
 
 1. Install dependencies:
@@ -93,18 +105,6 @@ context/
 utilities/
   diaryManager.jsx         # Native FS diary + web AsyncStorage fallback
 ```
-
-## Screenshots
-
-<div align="center">
-  <img src="assets/info/a.png" alt="Creating an entry" width="75%" />
-  <p><em>Creating an entry</em></p>
-</div>
-
-<div align="center">
-  <img src="assets/info/b.png" alt="Example result" width="75%" />
-  <p><em>Example result</em></p>
-</div>
 
 ## Data storage behavior
 
