@@ -96,11 +96,15 @@ utilities/
 
 ## Screenshots
 
-Creating an entry:
-![Creating an entry](assets/info/a.png)
+<div align="center">
+  <img src="assets/info/a.png" alt="Creating an entry" width="75%" />
+  <p><em>Creating an entry</em></p>
+</div>
 
-Example result:
-![Example result](assets/info/b.png)
+<div align="center">
+  <img src="assets/info/b.png" alt="Example result" width="75%" />
+  <p><em>Example result</em></p>
+</div>
 
 ## Data storage behavior
 
@@ -117,5 +121,4 @@ Example result:
 - `npm run reset-project` is defined but `scripts/reset-project.js` does not exist.
 - `npm test` is configured (`jest --watchAll`), but there are currently no test files.
 - API keys are used directly from the client app (`EXPO_PUBLIC_*`), which is not secure for production.
-- Weather is fetched via `http://api.weatherapi.com/...` instead of HTTPS.
-- Some UI/logic and logging are still prototype-level (minimal validation/error handling).
+- Some UI/logic is still prototype-level (minimal validation/error handling).
