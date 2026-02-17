@@ -54,17 +54,20 @@ Notes:
 
 ## Screenshots
 
-<div style="display: flex; flex-direction: row;">
-<div align="center">
-  <img src="assets/info/a.png" alt="Creating an entry" width="25%" />
-  <p><em>Creating an entry</em></p>
-</div>
-
-<div align="center">
-  <img src="assets/info/b.png" alt="Example result" width="25%" />
-  <p><em>Example result</em></p>
-</div>
-</div>
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/info/a.png" alt="Creating an entry" width="75%" />
+      <br />
+      <em>Creating an entry</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/info/b.png" alt="Example result" width="75%" />
+      <br />
+      <em>Example result</em>
+    </td>
+  </tr>
+</table>
 
 ## Getting started
 
